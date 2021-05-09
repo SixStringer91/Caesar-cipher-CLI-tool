@@ -1,6 +1,6 @@
-const fs = require('fs');
-const { Transform } = require('stream')
+const streamer = require('./modules/streamer')
 const program = require('commander');
+const fs = require('fs');
 
 class CipheringMachine {
   shift = null;
@@ -10,7 +10,7 @@ class CipheringMachine {
     this.input = '';
     this.output = '';
   };
-  error = () => process.stderr.write("omg");
+  error = () => process.stderr.write("missing some properties");
   setAction = action => this.action = action;
   setShift = number => this.shift = number;
   setInput = input => this.input = input;
@@ -20,24 +20,21 @@ class CipheringMachine {
       this.error();
       return
     }
-    const cyphering = (chunk) => { return this[`_${this.action}`](chunk) }
-    const inputStream = fs.createReadStream(this.input, 'utf8');
-    const outputStream = fs.createWriteStream(this.output, 'utf8');
-    const tsStream = new Transform({
-      transform(chunk, enc, callback) {
-        const transformed = enc !== 'utf-8'
-          ? cyphering(chunk.toString('utf8'))
-          : cyphering(chunk);
-        this.push(transformed);
-        callback();
-      }
-    });
-
-    inputStream.pipe(tsStream).pipe(outputStream);
-    // inputStream.on('data', chunk => {
-    //   const transformed = this[`_${this.action}`](chunk);
-    //   outputStream.write(transformed);
-    // });
+    const cyphering = (chunk) => this[`_${this.action}`](chunk);
+    if(!fs.existsSync(`${this.output}`)) {
+      this.output = process.stdout;}
+    if(!fs.existsSync(`${this.input}`)) {
+      this.input = process.stdin;
+      this.input.resume();
+      this.input.setEncoding('utf8');
+      console.log('write something');
+    }
+    streamer({
+      input: this.input,
+      output: this.output,
+      handler: cyphering,
+      dir: `${__dirname}`,
+    })
   }
   _isUpperCase = sym => sym.toUpperCase() === sym ? true : false;
   _indexDefiner = (currentIndex) => {
@@ -112,9 +109,6 @@ if (input) {
 if (output) {
   caesar.setOutput(output);
 }
-caesar.start()
-
-
-// $ node my_caesar_cli -a encode -s 7 -i "./input.txt" -o "./output.txt"
+caesar.start();
 
 
