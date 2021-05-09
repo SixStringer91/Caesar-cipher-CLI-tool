@@ -1,4 +1,5 @@
 const fs = require('fs');
+const { Transform } = require('stream')
 const program = require('commander');
 
 class CipheringMachine {
@@ -15,29 +16,41 @@ class CipheringMachine {
   setInput = input => this.input = input;
   setOutput = output => this.output = output;
   start = () => {
-    if ((this.action !== 'encode'&&this.action !== 'decode')|| this.shift === null){
+    if ((this.action !== 'encode' && this.action !== 'decode') || this.shift === null) {
       this.error();
-      return 
+      return
     }
+    const cyphering = (chunk) => { return this[`_${this.action}`](chunk) }
     const inputStream = fs.createReadStream(this.input, 'utf8');
     const outputStream = fs.createWriteStream(this.output, 'utf8');
-    inputStream.on('data', chunk => {
-      const transformed = this[`_${this.action}`](chunk);
-      outputStream.write(transformed);
+    const tsStream = new Transform({
+      transform(chunk, enc, callback) {
+        const transformed = enc !== 'utf-8'
+          ? cyphering(chunk.toString('utf8'))
+          : cyphering(chunk);
+        this.push(transformed);
+        callback();
+      }
     });
+
+    inputStream.pipe(tsStream).pipe(outputStream);
+    // inputStream.on('data', chunk => {
+    //   const transformed = this[`_${this.action}`](chunk);
+    //   outputStream.write(transformed);
+    // });
   }
   _isUpperCase = sym => sym.toUpperCase() === sym ? true : false;
   _indexDefiner = (currentIndex) => {
-    if(this.action==='encode'){
-     return currentIndex > this.baseString.length - 1
-      ? this._indexDefiner(currentIndex - this.baseString.length)
-      : this.baseString[currentIndex];
+    if (this.action === 'encode') {
+      return currentIndex > this.baseString.length - 1
+        ? this._indexDefiner(currentIndex - this.baseString.length)
+        : this.baseString[currentIndex];
     }
-    if(this.action==='decode'){
+    if (this.action === 'decode') {
       return currentIndex < 0
-      ? this._indexDefiner(currentIndex + this.baseString.length)
-      : this.baseString[currentIndex];
-     }
+        ? this._indexDefiner(currentIndex + this.baseString.length)
+        : this.baseString[currentIndex];
+    }
   }
   _maper = sym => {
     const finded = this.baseString.findIndex(el => el === sym.toLowerCase());
@@ -98,8 +111,8 @@ if (input) {
 }
 if (output) {
   caesar.setOutput(output);
-  caesar.start()
 }
+caesar.start()
 
 
 // $ node my_caesar_cli -a encode -s 7 -i "./input.txt" -o "./output.txt"
