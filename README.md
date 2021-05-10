@@ -15,8 +15,9 @@ write in your terminal:
 * path to output:```-o (or --output) 'some path'```(can be done without quotes);
 
 
-Нou can also create your own files. To do this, create them in the root of the program and specify their name in the console
-if there are no input or output files in the directory, the work can be continued in the console. Also you can use a negative value for shift;
+Нou can also create your own files. To do this, create them in the root of the program and specify their name in the console.  
+
+If there are no input or output files in the directory, the work can be continued in the console. Also you can use a negative value for shift;
 
 
 ### example:
