@@ -8,26 +8,46 @@ module.exports = class {
     this.input = '';
     this.output = '';
   };
-  error = () => process.stderr.write("missing some properties");
+  error = (key) => {
+    switch (key) {
+      case 'arguments':
+        process.stderr.write("Error: missing some args(--action and/or --shift)");
+        break;
+      case 'input':
+        process.stderr.write("Error: bad input");
+        break;
+      case 'output':
+        process.stderr.write("Error: bad output");
+        break;
+    }
+    process.exit(1)
+  }
   setAction = action => this._action = action;
   setShift = number => this._shift = number;
   setInput = input => this.input = input;
   setOutput = output => this.output = output;
   start = () => {
     if ((this._action !== 'encode' && this._action !== 'decode') || this._shift === null) {
-      this.error();
+      this.error('arguments');
       return
     }
     const cyphering = chunk => this[`_${this._action}`](chunk);
     if (!fs.existsSync(this.output)) {
-      this.output = process.stdout;
+      if(this.output){
+        this.error('output');
+      }
+      else this.output = process.stdout;
     }
     if (!fs.existsSync(this.input)) {
+      if(this.input){
+        this.error('input');
+      }
+      else{
       this.input = process.stdin;
       this.input.resume();
       this.input.setEncoding('utf8');
-      process.stdout.write('write something here:\n')
-
+      process.stdout.write('write something here:\n');
+    }
     }
     streamer({
       input: this.input,

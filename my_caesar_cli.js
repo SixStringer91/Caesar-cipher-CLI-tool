@@ -1,4 +1,3 @@
-
 const commandline = require('./modules/commands');
 const CipheringMachine = require('./modules/cipher');
 

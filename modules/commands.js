@@ -17,9 +17,9 @@ if (shift) {
   caesar.setShift(+shift);
 }
 if (input) {
-  caesar.setInput(path.resolve(__dirname,'..', input));
+caesar.setInput(path.resolve(__dirname,'..', input));
 }
 if (output) {
-  caesar.setOutput(path.resolve(__dirname,'..', output));
+caesar.setOutput(path.resolve(__dirname,'..', output));
 }
 }
