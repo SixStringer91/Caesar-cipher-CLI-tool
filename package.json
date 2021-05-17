@@ -1,0 +1,18 @@
+{
+  "name": "caesar-cypher",
+  "version": "1.0.0",
+  "description": "",
+  "main": "my_caesar_cli.js",
+  "scripts": {
+    "start": "node my_caesar_cli.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "commander": "^7.2.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.7"
+  }
+}
